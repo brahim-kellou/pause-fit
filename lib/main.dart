@@ -1,82 +1,102 @@
 import 'package:flutter/material.dart';
-import 'package:huawei_hmsavailability/huawei_hmsavailability.dart';
-import 'package:huawei_push/huawei_push.dart';
+import 'package:hms_start_hacking_flutter/app.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HMS Flutter starter app',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        brightness: Brightness.light,
+        primaryColor: Color.fromARGB(255, 255, 63, 25),
+        primaryColorLight: Colors.white,
+        primaryColorDark: Colors.black,
+
+        // Fonts
+        fontFamily: 'Roboto',
+        textTheme: const TextTheme(
+          headline1: TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.25,
+            color: Colors.black,
+          ),
+          headline2: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.0,
+            color: Colors.black,
+          ),
+          headline3: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.15,
+            color: Colors.black,
+          ),
+          subtitle1: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.15,
+            color: Colors.black,
+          ),
+          subtitle2: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.1,
+            color: Colors.black,
+          ),
+        ),
       ),
-      home: MyHomePage(title: 'HMS Flutter starter app'),
-    );
-  }
-}
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Color.fromARGB(255, 255, 63, 25),
+        primaryColorLight: Colors.black,
+        primaryColorDark: Colors.white,
 
-class MyHomePage extends StatelessWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      /**/
-      appBar: AppBar(
-        title: Text(title),
+        // Fonts
+        fontFamily: 'Roboto',
+        textTheme: const TextTheme(
+          headline1: TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.25,
+            color: Colors.white,
+          ),
+          headline2: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.0,
+            color: Colors.white,
+          ),
+          headline3: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.15,
+            color: Colors.white,
+          ),
+          subtitle1: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.15,
+            color: Colors.white,
+          ),
+          subtitle2: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 0.1,
+            color: Colors.white,
+          ),
+        ),
       ),
-      body: FutureBuilder<void>(
-          future: _checkHMS(),
-          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-            final String message = _getMessageFromSnapshot(snapshot);
-            return Text(message);
-          }),
+      debugShowCheckedModeBanner: false,
+      home: const App(),
     );
-  }
-
-  Future<void> _checkHMS() async {
-    await _testHmsCorePresence();
-    await _testAccountByRequestingPushNotificationsToken();
-  }
-
-  Future<void> _testHmsCorePresence() async {
-    final HmsApiAvailability hmsApiAvailability = new HmsApiAvailability();
-    final hmsCoreStatus = await hmsApiAvailability.isHMSAvailable();
-    if (hmsCoreStatus != 0) {
-      final hmsCoreNotAvailableExplanation =
-          await hmsApiAvailability.getErrorString(hmsCoreStatus);
-      throw new Exception(hmsCoreNotAvailableExplanation);
-    }
-  }
-
-  Future<void> _testAccountByRequestingPushNotificationsToken() async {
-    Push.getToken("HCM");
-    final pushToken = await Push.getTokenStream.first;
-    if (pushToken.isEmpty) {
-      throw new Exception(
-          'Push notifications token retrieved, but empty. Clear app data and try again.');
-    }
-  }
-
-  String _getMessageFromSnapshot(AsyncSnapshot<void> snapshot) {
-    switch (snapshot.connectionState) {
-      case ConnectionState.active:
-      case ConnectionState.waiting:
-        return 'Checking HMS status ...';
-      case ConnectionState.done:
-        if (snapshot.hasError) {
-          return 'Check HMS failed with ${snapshot.error.toString()}';
-        } else {
-          return 'All good. Start hacking!';
-        }
-      case ConnectionState.none:
-        return 'Checking HMS disabled.';
-    }
   }
 }
